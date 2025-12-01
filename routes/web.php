@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\RegisterController;
 
 # Route::get('/', function () {
 #     return view('welcome');
@@ -15,6 +16,10 @@ Route::get('/', function () {
 // Halaman Login
 Route::get('/login', [LoginController::class, 'index'])->name('login');
 Route::post('/login', [LoginController::class, 'authenticate'])->name('login.authenticate');
+
+// Halaman Register
+Route::get('/register', [RegisterController::class, 'index'])->name('register');
+Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
 
 // Logout
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
