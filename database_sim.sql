@@ -120,11 +120,11 @@ CREATE TABLE tbl_order (
 );
 
 INSERT INTO tbl_order (id_order, user_id, status, totalprice, alamat_pengiriman, catatan, created_at, updated_at) VALUES
-(10001, 14, 'pending', 0, 'Jl. Sultan Syarif Kasim No. 15, Bengkalis', 'Harap dikemas dengan baik', '2024-03-08 10:30:00', NOW()),
-(10002, 11, 'proses', 545000, 'Jl. Bantan No. 8, Kel. Bantan, Bengkalis', 'Kirim sebelum jam 3 sore', '2024-03-08 11:15:00', NOW()),
-(10003, 17, 'selesai', 385000, 'Jl. Raja Ali Haji No. 22, Bengkalis', 'Sudah lunas, terima kasih', '2024-03-07 14:20:00', NOW()),
-(10004, 16, 'batal', 120000, 'Jl. Lintas Sumatera KM. 5, Bengkalis', 'Pembeli membatalkan pesanan', '2024-03-06 16:45:00', NOW()),
-(10005, 15, 'selesai', 275000, 'Jl. Pasar Ikan No. 3, Bengkalis', 'Mohon receipt dimasukkan', '2024-03-08 09:00:00', NOW());
+(10001, 14, 'pending', 0, 'Jl. Sultan Syarif Kasim No. 15, Bengkalis', 'Harap dikemas dengan baik', NOW(), NOW()),
+(10002, 11, 'proses', 545000, 'Jl. Bantan No. 8, Kel. Bantan, Bengkalis', 'Kirim sebelum jam 3 sore', NOW(), NOW()),
+(10003, 17, 'selesai', 385000, 'Jl. Raja Ali Haji No. 22, Bengkalis', 'Sudah lunas, terima kasih', NOW(), NOW()),
+(10004, 16, 'batal', 120000, 'Jl. Lintas Sumatera KM. 5, Bengkalis', 'Pembeli membatalkan pesanan', NOW(), NOW()),
+(10005, 15, 'selesai', 275000, 'Jl. Pasar Ikan No. 3, Bengkalis', 'Mohon receipt dimasukkan', NOW(), NOW());
 
 CREATE TABLE tbl_barang_order (
     id_orderi INT(6) AUTO_INCREMENT PRIMARY KEY,
