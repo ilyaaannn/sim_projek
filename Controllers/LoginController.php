@@ -84,7 +84,7 @@ class LoginController extends Controller
             case 'kostumer':
                 return view('dashboard_kostumer');
             case 'staff':
-                return view('dashboard_staff');
+                return redirect()->route('staff.dashboard_staff');
             default:
                 return redirect()->route('login')->with('error', 'Level user tidak valid');
         }
