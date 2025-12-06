@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\StaffController;
+use App\Http\Controllers\KostumerController;
 
 # Route::get('/', function () {
 #     return view('welcome');
@@ -51,4 +52,29 @@ Route::prefix('staff')->name('staff.')->group(function () {
     // Routes untuk Stok Barang (Laporan)
     Route::get('/stok-barang', [StaffController::class, 'stokBarang'])->name('stok_barang.index');
     Route::get('/stok-barang/pdf', [StaffController::class, 'cetakStokPDF'])->name('stok_barang.pdf');
+});
+
+// Routes untuk Kostumer
+Route::middleware(['web'])->group(function () {
+    // Produk
+    Route::get('/kostumer/produk', [KostumerController::class, 'produk'])->name('kostumer.produk');
+    Route::get('/kostumer/produk/kategori/{id}', [KostumerController::class, 'produkByKategori'])->name('kostumer.produk.kategori');
+    Route::get('/kostumer/produk/detail/{id}', [KostumerController::class, 'detailProduk'])->name('kostumer.produk.detail');
+
+    // Keranjang
+    Route::get('/kostumer/keranjang', [KostumerController::class, 'keranjang'])->name('kostumer.keranjang');
+    Route::post('/kostumer/keranjang/tambah', [KostumerController::class, 'tambahKeranjang'])->name('kostumer.keranjang.tambah');
+    Route::post('/kostumer/keranjang/update/{id}', [KostumerController::class, 'updateKeranjang'])->name('kostumer.keranjang.update');
+    Route::delete('/kostumer/keranjang/hapus/{id}', [KostumerController::class, 'hapusKeranjang'])->name('kostumer.keranjang.hapus');
+
+    // Checkout & Order
+    Route::get('/kostumer/checkout', [KostumerController::class, 'checkout'])->name('kostumer.checkout');
+    Route::post('/kostumer/order/buat', [KostumerController::class, 'buatOrder'])->name('kostumer.order.buat');
+
+    // Riwayat
+    Route::get('/kostumer/riwayat', [KostumerController::class, 'riwayat'])->name('kostumer.riwayat');
+    Route::get('/kostumer/riwayat/detail/{id}', [KostumerController::class, 'detailRiwayat'])->name('kostumer.riwayat.detail');
+
+    // PDF Download - ROUTE BARU
+    Route::get('/kostumer/riwayat/pdf/{id}', [KostumerController::class, 'generatePDF'])->name('kostumer.riwayat.pdf');
 });
