@@ -82,7 +82,9 @@ class LoginController extends Controller
             case 'admin':
                 return view('dashboard_admin');
             case 'kostumer':
-                return view('dashboard_kostumer');
+                $controller = new \App\Http\Controllers\KostumerController();
+                return $controller->dashboard();
+                break;
             case 'staff':
                 return redirect()->route('staff.dashboard_staff');
             default:
