@@ -82,11 +82,11 @@
                         <tr>
                             <td>{{ $barang->firstItem() + $index }}</td>
                             <td>
-                                @if($item->image_path && Storage::disk('public')->exists($item->image_path))
-                                    <img src="{{ asset('storage/' . $item->image_path) }}" 
-                                         alt="{{ $item->nama_b }}" 
-                                         class="product-image"
-                                         style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+                                @if($item->image_path && file_exists(public_path('img/' . $item->image_path)))
+                                    <img src="{{ asset('img/' . $item->image_path) }}" 
+                                        alt="{{ $item->nama_b }}" 
+                                        class="product-image"
+                                        style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
                                 @else
                                     <div class="no-image" style="width: 60px; height: 60px; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
                                         <i class="bi bi-image text-muted"></i>
@@ -284,4 +284,5 @@
     padding: 15px 20px;
 }
 </style>
+
 @endsection
