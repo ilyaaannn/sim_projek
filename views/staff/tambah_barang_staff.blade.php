@@ -131,14 +131,14 @@
                         <tr>
                             <td class="text-center">{{ $transaksis->firstItem() + $index }}</td>
                             <td class="text-center">
-                                @if($transaksi->barang->image_path && Storage::disk('public')->exists($transaksi->barang->image_path))
-                                    <img src="{{ asset('storage/' . $transaksi->barang->image_path) }}" 
-                                         alt="{{ $transaksi->barang->nama_b }}" 
-                                         class="img-thumbnail" 
-                                         style="width: 60px; height: 60px; object-fit: cover;">
+                                @if($transaksi->barang->image_path && file_exists(public_path('img/' . $transaksi->barang->image_path)))
+                                    <img src="{{ asset('img/' . $transaksi->barang->image_path) }}" 
+                                        alt="{{ $transaksi->barang->nama_b }}" 
+                                        class="img-thumbnail" 
+                                        style="width: 60px; height: 60px; object-fit: cover;">
                                 @else
                                     <div class="bg-secondary text-white d-flex align-items-center justify-content-center" 
-                                         style="width: 60px; height: 60px;">
+                                        style="width: 60px; height: 60px;">
                                         <i class="bi bi-image fs-4"></i>
                                     </div>
                                 @endif
@@ -305,4 +305,5 @@ document.addEventListener('DOMContentLoaded', function() {
     padding: 0.25rem 0.5rem;
 }
 </style>
+
 @endsection
