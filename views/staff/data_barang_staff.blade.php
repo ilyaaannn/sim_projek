@@ -318,8 +318,8 @@
                     <tr>
                         <td>{{ $index + 1 }}</td>
                         <td>
-                            @if($item->image_path && Storage::disk('public')->exists($item->image_path))
-                                <img src="{{ asset('storage/' . $item->image_path) }}" alt="{{ $item->nama_b }}" class="product-image">
+                            @if($item->image_path && file_exists(public_path('img/' . $item->image_path)))
+                                <img src="{{ asset('img/' . $item->image_path) }}" alt="{{ $item->nama_b }}" class="product-image">
                             @else
                                 <div class="no-image">
                                     <i class="bi bi-image"></i>
@@ -476,4 +476,5 @@ function previewImage(event, previewId) {
     }
 }
 </script>
+
 @endsection
