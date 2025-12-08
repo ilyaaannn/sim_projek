@@ -225,19 +225,17 @@
         <thead>
             <tr>
                 <th width="5%">No</th>
-                <th width="10%">Kode</th>
-                <th width="25%">Nama Barang</th>
-                <th width="15%">Kategori</th>
+                <th width="30%">Nama Barang</th>
+                <th width="18%">Kategori</th>
                 <th width="12%" class="text-center">Stok</th>
-                <th width="18%" class="text-right">Harga</th>
-                <th width="10%" class="text-center">Status</th>
+                <th width="20%" class="text-right">Harga</th>
+                <th width="15%" class="text-center">Status</th>
             </tr>
         </thead>
         <tbody>
             @forelse($barang as $index => $item)
             <tr>
                 <td class="text-center">{{ $index + 1 }}</td>
-                <td><strong>{{ $item->id_barang }}</strong></td>
                 <td>
                     <strong>{{ $item->nama_b }}</strong>
                     @if($item->desc_b)
@@ -276,7 +274,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="7" class="no-data">
+                <td colspan="6" class="no-data">
                     Tidak ada data barang yang tersedia
                 </td>
             </tr>
