@@ -155,14 +155,14 @@
             </div>
 
             <!-- Pagination -->
-            <div class="d-flex justify-content-between align-items-center mt-4">
+            <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
                 <div class="text-muted">
                     Menampilkan {{ $barang->firstItem() ?? 0 }} - {{ $barang->lastItem() ?? 0 }} 
                     dari {{ $barang->total() }} barang
                 </div>
-                <div>
-                    {{ $barang->links() }}
-                </div>
+                <nav aria-label="Page navigation">
+                    {{ $barang->appends(request()->query())->links('pagination::bootstrap-5') }}
+                </nav>
             </div>
         </div>
     </div>
@@ -286,3 +286,4 @@
 </style>
 
 @endsection
+
