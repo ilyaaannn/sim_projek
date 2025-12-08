@@ -153,9 +153,14 @@ class StaffController extends Controller
         $imagePath = null;
         
         if ($request->hasFile('image')) {
-            // Menyimpan gambar ke storage/app/public/barang
-            // File akan dapat diakses via public/storage/barang
-            $imagePath = $request->file('image')->store('barang', 'public');
+            // Generate nama file unik
+            $fileName = time() . '_' . uniqid() . '.' . $request->file('image')->getClientOriginalExtension();
+            
+            // Pindahkan file ke folder public/img
+            $request->file('image')->move(public_path('img'), $fileName);
+            
+            // Simpan hanya nama file
+            $imagePath = $fileName;
         }
 
         DB::table('tbl_barang')->insert([
@@ -164,7 +169,7 @@ class StaffController extends Controller
             'id_kategori' => $request->id_kategori,
             'stok_b' => 0,
             'price' => $request->price,
-            'image_path' => $imagePath, // Simpan path relatif: barang/filename.jpg
+            'image_path' => $imagePath, // Simpan nama file: filename.jpg
             'status' => $request->status,
             'created_at' => now(),
             'updated_at' => now()
@@ -192,12 +197,17 @@ class StaffController extends Controller
         
         if ($request->hasFile('image')) {
             // Hapus gambar lama jika ada
-            if ($imagePath && Storage::disk('public')->exists($imagePath)) {
-                Storage::disk('public')->delete($imagePath);
+            if ($imagePath && file_exists(public_path('img/' . $imagePath))) {
+                unlink(public_path('img/' . $imagePath));
             }
             
-            // Upload gambar baru
-            $imagePath = $request->file('image')->store('barang', 'public');
+            // Generate nama file unik
+            $fileName = time() . '_' . uniqid() . '.' . $request->file('image')->getClientOriginalExtension();
+            
+            // Upload gambar baru ke folder public/img
+            $request->file('image')->move(public_path('img'), $fileName);
+            
+            $imagePath = $fileName;
         }
 
         DB::table('tbl_barang')
@@ -222,8 +232,8 @@ class StaffController extends Controller
         }
 
         // Hapus gambar jika ada
-        if ($barang->image_path && Storage::disk('public')->exists($barang->image_path)) {
-            Storage::disk('public')->delete($barang->image_path);
+        if ($barang->image_path && file_exists(public_path('img/' . $barang->image_path))) {
+            unlink(public_path('img/' . $barang->image_path));
         }
 
         DB::table('tbl_barang')->where('id_barang', $id)->delete();
