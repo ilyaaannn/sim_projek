@@ -29,6 +29,34 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 // Dashboard (protected routes) - berdasarkan level user
 Route::get('/dashboard', [LoginController::class, 'dashboard'])->name('dashboard');
 
+// Routes untuk Admin
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+
+    // Kelola Penjualan
+    Route::get('/penjualan', [AdminController::class, 'penjualan'])->name('penjualan.index');
+    Route::get('/penjualan/{id}', [AdminController::class, 'detailPenjualan'])->name('penjualan.detail');
+    Route::put('/penjualan/{id}/status', [AdminController::class, 'updateStatusPenjualan'])->name('penjualan.update_status');
+
+    // Kelola Barang
+    Route::get('/barang', [AdminController::class, 'barang'])->name('barang.index');
+    Route::post('/barang', [AdminController::class, 'storeBarang'])->name('barang.store');
+    Route::put('/barang/{id}', [AdminController::class, 'updateBarang'])->name('barang.update');
+    Route::delete('/barang/{id}', [AdminController::class, 'destroyBarang'])->name('barang.destroy');
+
+    // Lihat Stok
+    Route::get('/stok', [AdminController::class, 'stok'])->name('stok.index');
+
+    // Transaksi Penjualan
+    Route::get('/transaksi', [AdminController::class, 'transaksi'])->name('transaksi.index');
+    Route::post('/transaksi', [AdminController::class, 'storeTransaksi'])->name('transaksi.store');
+
+    // Laporan Penjualan
+    Route::get('/laporan', [AdminController::class, 'laporan'])->name('laporan.index');
+    Route::get('/laporan/pdf', [AdminController::class, 'laporanPDF'])->name('laporan.pdf');
+    Route::get('/laporan/excel', [AdminController::class, 'laporanExcel'])->name('laporan.excel');
+});
+
 Route::prefix('staff')->name('staff.')->group(function () {
     Route::get('/dashboard', [StaffController::class, 'dashboardStaff'])->name('dashboard_staff');
 
