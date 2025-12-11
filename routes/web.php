@@ -5,6 +5,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\KostumerController;
+use App\Http\Controllers\AdminController;
 
 # Route::get('/', function () {
 #     return view('welcome');
@@ -57,6 +58,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/laporan/excel', [AdminController::class, 'laporanExcel'])->name('laporan.excel');
 });
 
+// route ke staff
 Route::prefix('staff')->name('staff.')->group(function () {
     Route::get('/dashboard', [StaffController::class, 'dashboardStaff'])->name('dashboard_staff');
 
