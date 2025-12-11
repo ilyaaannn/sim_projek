@@ -286,7 +286,7 @@ class KostumerController extends Controller
         return back()->with('error', 'Item tidak ditemukan');
     }
 
-    // Halaman Checkout
+    // Halaman Checkout - DIPERBAIKI
     public function checkout()
     {
         $redirect = $this->checkKostumer();
@@ -294,44 +294,73 @@ class KostumerController extends Controller
 
         $keranjang = Session::get('keranjang', []);
 
+        // Validasi keranjang kosong
         if (empty($keranjang)) {
-            return redirect()->route('kostumer.produk')->with('error', 'Keranjang masih kosong');
+            return redirect()->route('kostumer.produk')
+                ->with('error', 'Keranjang masih kosong. Silakan tambahkan produk terlebih dahulu.');
         }
 
         // Validasi stok sebelum checkout
         foreach ($keranjang as $id => $item) {
-            $produk = DB::table('tbl_barang')->where('id_barang', $id)->first();
-            if (!$produk || $produk->stok_b < $item['quantity']) {
+            $produk = DB::table('tbl_barang')
+                ->where('id_barang', $id)
+                ->where('status', 'active')
+                ->first();
+
+            if (!$produk) {
+                // Hapus item yang tidak ada dari keranjang
+                unset($keranjang[$id]);
+                Session::put('keranjang', $keranjang);
                 return redirect()->route('kostumer.keranjang')
-                    ->with('error', 'Stok produk ' . $item['nama_b'] . ' tidak mencukupi');
+                    ->with('error', 'Produk "' . $item['nama_b'] . '" tidak tersedia lagi');
             }
+
+            if ($produk->stok_b < $item['quantity']) {
+                return redirect()->route('kostumer.keranjang')
+                    ->with('error', 'Stok produk "' . $item['nama_b'] . '" tidak mencukupi. Stok tersedia: ' . $produk->stok_b);
+            }
+
+            // Update stok terbaru di session
+            $keranjang[$id]['stok_b'] = $produk->stok_b;
+            $keranjang[$id]['price'] = $produk->price; // Update harga terbaru juga
         }
 
+        Session::put('keranjang', $keranjang);
+
+        // Hitung total
         $total = 0;
         foreach ($keranjang as $item) {
             $total += $item['price'] * $item['quantity'];
         }
 
+        // Ambil data user
         $user = Session::get('user');
 
         return view('kostumer.checkout', compact('keranjang', 'total', 'user'));
     }
 
-    // Buat Order
+    // Buat Order - DIPERBAIKI & DISESUAIKAN DATABASE
     public function buatOrder(Request $request)
     {
         $redirect = $this->checkKostumer();
         if ($redirect) return $redirect;
 
+        // Validasi input
         $request->validate([
-            'alamat_pengiriman' => 'required|string|max:500',
+            'alamat_pengiriman' => 'required|string|min:10|max:500',
             'catatan' => 'nullable|string|max:1000'
+        ], [
+            'alamat_pengiriman.required' => 'Alamat pengiriman harus diisi',
+            'alamat_pengiriman.min' => 'Alamat pengiriman minimal 10 karakter',
+            'alamat_pengiriman.max' => 'Alamat pengiriman maksimal 500 karakter',
+            'catatan.max' => 'Catatan maksimal 1000 karakter'
         ]);
 
         $keranjang = Session::get('keranjang', []);
 
         if (empty($keranjang)) {
-            return redirect()->route('kostumer.produk')->with('error', 'Keranjang masih kosong');
+            return redirect()->route('kostumer.produk')
+                ->with('error', 'Keranjang masih kosong');
         }
 
         DB::beginTransaction();
@@ -341,20 +370,24 @@ class KostumerController extends Controller
 
             // Validasi stok dan hitung total
             foreach ($keranjang as $item) {
-                $produk = DB::table('tbl_barang')->where('id_barang', $item['id_barang'])->first();
+                $produk = DB::table('tbl_barang')
+                    ->where('id_barang', $item['id_barang'])
+                    ->where('status', 'active')
+                    ->lockForUpdate() // Lock row untuk menghindari race condition
+                    ->first();
 
                 if (!$produk) {
-                    throw new \Exception('Produk ' . $item['nama_b'] . ' tidak ditemukan');
+                    throw new \Exception('Produk "' . $item['nama_b'] . '" tidak ditemukan atau sudah tidak aktif');
                 }
 
                 if ($produk->stok_b < $item['quantity']) {
-                    throw new \Exception('Stok produk ' . $item['nama_b'] . ' tidak mencukupi');
+                    throw new \Exception('Stok produk "' . $item['nama_b'] . '" tidak mencukupi. Stok tersedia: ' . $produk->stok_b);
                 }
 
-                $totalPrice += $item['price'] * $item['quantity'];
+                $totalPrice += $produk->price * $item['quantity'];
             }
 
-            // Buat order
+            // Buat order - SESUAI STRUKTUR DATABASE
             $orderId = DB::table('tbl_order')->insertGetId([
                 'user_id' => $userId,
                 'status' => 'pending',
@@ -367,16 +400,18 @@ class KostumerController extends Controller
 
             // Insert detail order dan update stok
             foreach ($keranjang as $item) {
-                $barang = DB::table('tbl_barang')->where('id_barang', $item['id_barang'])->first();
+                $barang = DB::table('tbl_barang')
+                    ->where('id_barang', $item['id_barang'])
+                    ->first();
 
-                // Insert ke tbl_barang_order
+                // Insert ke tbl_barang_order - SESUAI STRUKTUR DATABASE
                 DB::table('tbl_barang_order')->insert([
                     'id_order' => $orderId,
                     'id_barang' => $item['id_barang'],
                     'id_kategori' => $barang->id_kategori,
                     'kuantiti' => $item['quantity'],
-                    'price' => $item['price'],
-                    'total' => $item['price'] * $item['quantity'],
+                    'price' => $barang->price,
+                    'total' => $barang->price * $item['quantity'],
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);
@@ -391,29 +426,40 @@ class KostumerController extends Controller
                         'updated_at' => now()
                     ]);
 
-                // Catat transaksi barang
+                // Catat transaksi barang - SESUAI STRUKTUR DATABASE
                 DB::table('tbl_transaksi_barang')->insert([
                     'id_barang' => $item['id_barang'],
                     'tipe' => 'keluar',
                     'kuantiti' => $item['quantity'],
                     'stok_sebelum' => $barang->stok_b,
                     'stok_sesudah' => $stokBaru,
-                    'desc_tb' => 'Order #' . $orderId . ' oleh ' . Session::get('user.username'),
-                    'user_id' => $userId,
+                    'desc_tb' => 'Pemesanan #' . $orderId . ' oleh ' . Session::get('user.username'),
+                    'id_user' => $userId,
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);
             }
+
+            // Update total price di order (jika ada perubahan harga)
+            DB::table('tbl_order')
+                ->where('id_order', $orderId)
+                ->update([
+                    'totalprice' => $totalPrice,
+                    'updated_at' => now()
+                ]);
 
             DB::commit();
 
             // Kosongkan keranjang
             Session::forget('keranjang');
 
-            return redirect()->route('kostumer.riwayat')->with('success', 'Pesanan berhasil dibuat! Nomor Order: #' . $orderId);
+            return redirect()->route('kostumer.riwayat')
+                ->with('success', 'Pesanan berhasil dibuat! Nomor Order: #' . $orderId . '. Total: Rp ' . number_format($totalPrice, 0, ',', '.'));
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+
+            return redirect()->route('kostumer.keranjang')
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
