@@ -58,7 +58,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/laporan/excel', [AdminController::class, 'laporanExcel'])->name('laporan.excel');
 });
 
-// route ke staff
 Route::prefix('staff')->name('staff.')->group(function () {
     Route::get('/dashboard', [StaffController::class, 'dashboardStaff'])->name('dashboard_staff');
 
