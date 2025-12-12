@@ -476,5 +476,4 @@ function previewImage(event, previewId) {
     }
 }
 </script>
-
 @endsection
