@@ -82,16 +82,30 @@ class StaffController extends Controller
     {
         $request->validate([
             'nama_kategori' => 'required|string|max:100',
-            'deskripsi' => 'nullable|string'
+            'deskripsi' => 'nullable|string',
+            'gambar' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048'
         ], [
             'nama_kategori.required' => 'Nama kategori harus diisi',
-            'nama_kategori.max' => 'Nama kategori maksimal 100 karakter'
+            'nama_kategori.max' => 'Nama kategori maksimal 100 karakter',
+            'gambar.image' => 'File harus berupa gambar',
+            'gambar.mimes' => 'Format gambar harus jpeg, jpg, png, atau gif',
+            'gambar.max' => 'Ukuran gambar maksimal 2MB'
         ]);
 
-        Kategori::create([
+        $data = [
             'nama_kategori' => $request->nama_kategori,
             'deskripsi' => $request->deskripsi
-        ]);
+        ];
+
+        // Handle upload gambar
+        if ($request->hasFile('gambar')) {
+            $file = $request->file('gambar');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('img'), $filename);
+            $data['gambar_path'] = $filename;
+        }
+
+        Kategori::create($data);
 
         return redirect()->route('staff.kategori.index')
             ->with('success', 'Kategori berhasil ditambahkan');
@@ -101,17 +115,37 @@ class StaffController extends Controller
     {
         $request->validate([
             'nama_kategori' => 'required|string|max:100',
-            'deskripsi' => 'nullable|string'
+            'deskripsi' => 'nullable|string',
+            'gambar' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048'
         ], [
             'nama_kategori.required' => 'Nama kategori harus diisi',
-            'nama_kategori.max' => 'Nama kategori maksimal 100 karakter'
+            'nama_kategori.max' => 'Nama kategori maksimal 100 karakter',
+            'gambar.image' => 'File harus berupa gambar',
+            'gambar.mimes' => 'Format gambar harus jpeg, jpg, png, atau gif',
+            'gambar.max' => 'Ukuran gambar maksimal 2MB'
         ]);
 
         $kategori = Kategori::findOrFail($id);
-        $kategori->update([
+        
+        $data = [
             'nama_kategori' => $request->nama_kategori,
             'deskripsi' => $request->deskripsi
-        ]);
+        ];
+
+        // Handle upload gambar baru
+        if ($request->hasFile('gambar')) {
+            // Hapus gambar lama jika ada
+            if ($kategori->gambar_path && file_exists(public_path('img/' . $kategori->gambar_path))) {
+                unlink(public_path('img/' . $kategori->gambar_path));
+            }
+
+            $file = $request->file('gambar');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('img'), $filename);
+            $data['gambar_path'] = $filename;
+        }
+
+        $kategori->update($data);
 
         return redirect()->route('staff.kategori.index')
             ->with('success', 'Kategori berhasil diupdate');
@@ -120,13 +154,19 @@ class StaffController extends Controller
     public function destroyk($id)
     {
         $kategori = Kategori::findOrFail($id);
+        
+        // Hapus gambar jika ada
+        if ($kategori->gambar_path && file_exists(public_path('img/' . $kategori->gambar_path))) {
+            unlink(public_path('img/' . $kategori->gambar_path));
+        }
+        
         $kategori->delete();
 
         return redirect()->route('staff.kategori.index')
             ->with('success', 'Kategori berhasil dihapus');
     }
 
-   public function dataBarang()
+    public function dataBarang()
     {
         $barang = DB::table('tbl_barang')
             ->leftJoin('tbl_kategori', 'tbl_barang.id_kategori', '=', 'tbl_kategori.id_kategori')
