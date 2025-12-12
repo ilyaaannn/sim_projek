@@ -69,7 +69,6 @@
                         <tr>
                             <th width="60">No</th>
                             <th width="100">Gambar</th>
-                            <th>Kode Barang</th>
                             <th>Nama Barang</th>
                             <th>Kategori</th>
                             <th width="120" class="text-center">Stok</th>
@@ -81,7 +80,7 @@
                         @forelse($barang as $index => $item)
                         <tr>
                             <td>{{ $barang->firstItem() + $index }}</td>
-                            <td>
+                           <td>
                                 @if($item->image_path && file_exists(public_path('img/' . $item->image_path)))
                                     <img src="{{ asset('img/' . $item->image_path) }}" 
                                         alt="{{ $item->nama_b }}" 
@@ -92,9 +91,6 @@
                                         <i class="bi bi-image text-muted"></i>
                                     </div>
                                 @endif
-                            </td>
-                            <td>
-                                <strong>{{ $item->id_barang }}</strong>
                             </td>
                             <td>
                                 <strong>{{ $item->nama_b }}</strong>
@@ -153,7 +149,6 @@
                     </tbody>
                 </table>
             </div>
-
             <!-- Pagination -->
             <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
                 <div class="text-muted">
@@ -284,6 +279,4 @@
     padding: 15px 20px;
 }
 </style>
-
 @endsection
-
